@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}Subject Analysis: {{ subject.name }} - B.Tech{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Subject Selector Strip & Title -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2">
+            <div class="flex items-center space-x-2">
+                <span class="px-3 py-1 rounded-full text-xs font-bold font-mono {% if subject.is_featured %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-100 text-slate-700{% endif %}">
+                    {{ subject.code }}
+                </span>
+                {% if subject.is_featured %}
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white flex items-center space-x-1 shadow-sm">
+                        <i class="fa-brands fa-python"></i>
+                        <span>Featured Python Course</span>
+                    </span>
+                {% endif %}
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                {{ subject.name }}
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500">
+                Course Faculty: <strong class="text-slate-700">{{ subject.instructor }}</strong> • {{ subject.semester }} ({{ subject.credits }} Credits)
+            </p>
+        </div>
+
+        <!-- Subject Switcher Dropdown -->
+        <div class="w-full md:w-72 space-y-1.5">
+            <label for="subjectSelect" class="block text-xs font-bold text-slate-600 uppercase tracking-wider">
+                Switch Subject Analysis:
+            </label>
+            <div class="relative">
+                <select id="subjectSelect" onchange="location = this.value;"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                    {% for s in all_subjects %}
+                        <option value="{{ url_for('subject_analysis', subject_id=s.id) }}" {% if s.id == subject.id %}selected{% endif %}>
+                            {{ s.code }}: {{ s.name }} {% if s.is_featured %}(Python){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Metric 1: Overall Score -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-2xl font-black">
+                ★
+            </div>
+            <div>
+                <div class="text-3xl font-black text-slate-900">{{ avg_overall }} <span class="text-sm font-semibold text-slate-400">/ 5.0</span></div>
+                <div class="text-xs text-slate-500 font-semibold">Overall Course Rating</div>
+            </div>
+        </div>
+
+        <!-- Metric 2: Satisfaction Percentage -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-percent"></i>
+            </div>
+            <div>
+                <div class="text-3xl font-black text-emerald-600">{{ satisfaction_pct }}%</div>
+                <div class="text-xs text-slate-500 font-semibold">Satisfaction Benchmark</div>
+            </div>
+        </div>
+
+        <!-- Metric 3: Total Submissions -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-users-viewfinder"></i>
+            </div>
+            <div>
+                <div class="text-3xl font-black text-slate-900">{{ total_responses }}</div>
+                <div class="text-xs text-slate-500 font-semibold">Student Evaluations</div>
+            </div>
+        </div>
+
+        <!-- Metric 4: Question 5 Optional Engagement -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <div>
+                <div class="text-3xl font-black text-indigo-600">{{ q5_count }} <span class="text-xs font-semibold text-slate-400">({{ avg_q5|round(1) }}/5.0)</span></div>
+                <div class="text-xs text-slate-500 font-semibold">Q5 Elective Responses</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Radar Chart: 5-Question Dimension Comparison -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-compass-drafting text-indigo-600"></i>
+                        <span>5-Dimension Evaluation Radar</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Comparison of average scores across all criteria</p>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">Radar Chart</span>
+            </div>
+            <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Bar Chart: Star Rating Distribution -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-column text-emerald-600"></i>
+                        <span>Overall Star Rating Distribution</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Breakdown of student ratings from 5 Stars to 1 Star</p>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Frequency Bar</span>
+            </div>
+            <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+                <canvas id="distributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question-by-Question Deep Dive Analysis -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="pb-2 border-b border-slate-100">
+            <h2 class="text-xl font-bold text-slate-900">5-Criteria Subject Performance Breakdown</h2>
+            <p class="text-xs text-slate-500">In-depth statistical scoring and message box summaries for each syllabus criterion</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Criterion 1 -->
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div class="flex items-start justify-between">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">Q1</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-sm">
+                        Avg: {{ avg_q1 }} / 5.0
+                    </span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm">Curriculum & Concept Coverage</h4>
+                <p class="text-xs text-slate-600">Syllabus comprehensiveness, Python 3 concepts, OOP, data structures & standard library.</p>
+                <div class="pt-2 border-t border-slate-200 text-xs text-indigo-700 font-semibold flex items-center">
+                    <i class="fa-regular fa-message mr-1.5"></i> Dedicated Message Box recorded
+                </div>
+            </div>
+
+            <!-- Criterion 2 -->
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div class="flex items-start justify-between">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">Q2</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-sm">
+                        Avg: {{ avg_q2 }} / 5.0
+                    </span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm">Teaching Methodology & Live Coding</h4>
+                <p class="text-xs text-slate-600">Instructor live code demonstrations, PyCharm / VS Code debugging walkthroughs & explanation clarity.</p>
+                <div class="pt-2 border-t border-slate-200 text-xs text-indigo-700 font-semibold flex items-center">
+                    <i class="fa-regular fa-message mr-1.5"></i> Dedicated Message Box recorded
+                </div>
+            </div>
+
+            <!-- Criterion 3 -->
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div class="flex items-start justify-between">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">Q3</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-sm">
+                        Avg: {{ avg_q3 }} / 5.0
+                    </span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm">Pace of Instruction & Doubt Resolution</h4>
+                <p class="text-xs text-slate-600">Comfortable lecture pacing, classroom doubt clearance and Friday interactive problem sessions.</p>
+                <div class="pt-2 border-t border-slate-200 text-xs text-indigo-700 font-semibold flex items-center">
+                    <i class="fa-regular fa-message mr-1.5"></i> Dedicated Message Box recorded
+                </div>
+            </div>
+
+            <!-- Criterion 4 -->
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-3">
+                <div class="flex items-start justify-between">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">Q4</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-sm">
+                        Avg: {{ avg_q4 }} / 5.0
+                    </span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm">Hands-on Lab Exercises & Mini-Projects</h4>
+                <p class="text-xs text-slate-600">Practical utility of lab problems, automated unit testing, and web app / script project deliverables.</p>
+                <div class="pt-2 border-t border-slate-200 text-xs text-indigo-700 font-semibold flex items-center">
+                    <i class="fa-regular fa-message mr-1.5"></i> Dedicated Message Box recorded
+                </div>
+            </div>
+
+            <!-- Criterion 5 (Optional) -->
+            <div class="p-5 rounded-2xl border border-emerald-200 bg-emerald-50/30 space-y-3 md:col-span-2">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">Q5</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            Optional Question
+                        </span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-emerald-200 text-xs font-bold text-emerald-900 shadow-sm">
+                        Avg: {% if avg_q5 > 0 %}{{ avg_q5 }} / 5.0{% else %}No rating provided{% endif %}
+                    </span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm">Industry Readiness, Modern Frameworks & Electives</h4>
+                <p class="text-xs text-slate-600">Recommendations on modern Python frameworks (Flask, FastAPI, Django, Pandas, NumPy, PyTorch) for future syllabus enrichment.</p>
+                <div class="pt-2 border-t border-emerald-100 text-xs text-emerald-700 font-semibold flex items-center">
+                    <i class="fa-regular fa-lightbulb mr-1.5"></i> Optional Message Box submissions: {{ q5_count }} recorded
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- CONFIDENTIALITY BOUNDARY: ADMIN ONLY DETAILED STUDENT TABLE   -->
+    <!-- ============================================================== -->
+    {% if is_admin %}
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-indigo-200 shadow-lg space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-100">
+                <div>
+                    <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Admin Access Exclusive</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900">
+                        Student Feedback Log: {{ subject.name }}
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Authorized view displaying individual student roll numbers, star ratings, and exact written message box comments
+                    </p>
+                </div>
+
+                <a href="{{ url_for('export_csv') }}" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download Complete CSV</span>
+                </a>
+            </div>
+
+            {% if admin_feedbacks_list %}
+                <div class="space-y-4">
+                    {% for fb in admin_feedbacks_list %}
+                    <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4 hover:bg-white hover:shadow-md transition">
+                        <!-- Student Header Strip -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                                    {{ fb.full_name[:2] }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                        <span>{{ fb.full_name }}</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800">{{ fb.roll_no }}</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-500">
+                                        {{ fb.branch }} • Submitted: {{ fb.submitted_at[:16] }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-semibold text-slate-500">Overall Score:</span>
+                                <span class="px-3 py-1 rounded-xl text-sm font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    ★ {{ fb.overall_score }} / 5.0
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 5 Question Ratings & Message Boxes Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            <!-- Q1 -->
+                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1.5">
+                                <div class="flex items-center justify-between font-bold text-slate-800">
+                                    <span>Q1: Curriculum Coverage</span>
+                                    <span class="text-amber-500">★ {{ fb.q1_score }}/5</span>
+                                </div>
+                                <div class="text-slate-600 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                    "{{ fb.q1_message or 'No additional comment provided in message box.' }}"
+                                </div>
+                            </div>
+
+                            <!-- Q2 -->
+                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1.5">
+                                <div class="flex items-center justify-between font-bold text-slate-800">
+                                    <span>Q2: Methodology & Code Demos</span>
+                                    <span class="text-amber-500">★ {{ fb.q2_score }}/5</span>
+                                </div>
+                                <div class="text-slate-600 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                    "{{ fb.q2_message or 'No additional comment provided in message box.' }}"
+                                </div>
+                            </div>
+
+                            <!-- Q3 -->
+                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1.5">
+                                <div class="flex items-center justify-between font-bold text-slate-800">
+                                    <span>Q3: Pace & Doubt Clearance</span>
+                                    <span class="text-amber-500">★ {{ fb.q3_score }}/5</span>
+                                </div>
+                                <div class="text-slate-600 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                    "{{ fb.q3_message or 'No additional comment provided in message box.' }}"
+                                </div>
+                            </div>
+
+                            <!-- Q4 -->
+                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1.5">
+                                <div class="flex items-center justify-between font-bold text-slate-800">
+                                    <span>Q4: Lab Tasks & Projects</span>
+                                    <span class="text-amber-500">★ {{ fb.q4_score }}/5</span>
+                                </div>
+                                <div class="text-slate-600 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                    "{{ fb.q4_message or 'No additional comment provided in message box.' }}"
+                                </div>
+                            </div>
+
+                            <!-- Q5 (Optional) -->
+                            <div class="p-3 rounded-xl bg-white border border-emerald-200 space-y-1.5 md:col-span-2">
+                                <div class="flex items-center justify-between font-bold text-slate-800">
+                                    <span class="flex items-center space-x-1.5">
+                                        <span>Q5: Industry Electives (Optional)</span>
+                                        <span class="px-1.5 py-0.2 rounded text-[9px] bg-emerald-100 text-emerald-800">Optional</span>
+                                    </span>
+                                    <span class="text-amber-500">
+                                        {% if fb.q5_score %}★ {{ fb.q5_score }}/5{% else %}<span class="text-slate-400 font-normal">Skipped</span>{% endif %}
+                                    </span>
+                                </div>
+                                <div class="text-slate-600 italic bg-emerald-50/40 p-2 rounded-lg border border-emerald-100">
+                                    "{{ fb.q5_message or 'Optional question message box was left blank by student.' }}"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8 text-slate-500 text-xs">
+                    No student submissions recorded for this subject yet.
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Student Privacy Notice Banner -->
+        <div class="bg-indigo-50/80 rounded-3xl p-6 sm:p-7 border border-indigo-200 flex items-start space-x-4">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 text-base">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div class="space-y-1.5 text-xs text-indigo-900">
+                <div class="font-bold text-sm text-indigo-950">Student Confidentiality & Privacy Guarantee</div>
+                <p class="leading-relaxed">
+                    Under the B.Tech Course Evaluation Board policy, <strong>only Faculty Administrators and Department Heads have access to individual student identities, roll numbers, and raw message box notes</strong>.
+                </p>
+                <p class="text-indigo-700">
+                    Students can view overall subject trends, radar dimensions, and satisfaction scores to promote transparent academic growth while safeguarding student anonymity.
+                </p>
+                {% if not current_user %}
+                    <div class="pt-2">
+                        <a href="{{ url_for('login') }}" class="font-bold text-indigo-800 underline hover:text-indigo-950">Sign in as Faculty Admin to view student submission logs &rarr;</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Chart.js Visualization Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Radar Chart
+        const ctxRadar = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: [
+                    'Q1: Curriculum',
+                    'Q2: Teaching Method',
+                    'Q3: Pace & Doubts',
+                    'Q4: Lab Exercises',
+                    'Q5: Electives (Opt)'
+                ],
+                datasets: [{
+                    label: '{{ subject.code }} Average Score',
+                    data: [
+                        {{ avg_q1 }},
+                        {{ avg_q2 }},
+                        {{ avg_q3 }},
+                        {{ avg_q4 }},
+                        {{ avg_q5 if avg_q5 > 0 else 0 }}
+                    ],
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                    borderColor: '#4f46e5',
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#4f46e5',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#e2e8f0' },
+                        grid: { color: '#f1f5f9' },
+                        suggestedMin: 0,
+                        suggestedMax: 5,
+                        ticks: { stepSize: 1, backdropColor: 'transparent' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+
+        // Distribution Bar Chart
+        const ctxDist = document.getElementById('distributionChart').getContext('2d');
+        new Chart(ctxDist, {
+            type: 'bar',
+            data: {
+                labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
+                datasets: [{
+                    label: 'Number of Students',
+                    data: [
+                        {{ rating_distribution[5] }},
+                        {{ rating_distribution[4] }},
+                        {{ rating_distribution[3] }},
+                        {{ rating_distribution[2] }},
+                        {{ rating_distribution[1] }}
+                    ],
+                    backgroundColor: [
+                        '#10b981', // Emerald 500
+                        '#3b82f6', // Blue 500
+                        '#f59e0b', // Amber 500
+                        '#f97316', // Orange 500
+                        '#ef4444'  // Rose 500
+                    ],
+                    borderRadius: 8,
+                    barThickness: 32
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

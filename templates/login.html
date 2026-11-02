@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - B.Tech Course Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-8 space-y-6">
+    <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl space-y-6">
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-emerald-500 flex items-center justify-center text-white text-2xl shadow-md">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Portal Authentication</h2>
+            <p class="text-xs text-slate-500">Sign in to evaluate B.Tech Python subjects or manage department analytics</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" action="{{ url_for('login') }}" class="space-y-4">
+            <div>
+                <label for="username" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Username / ID
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input type="text" id="username" name="username" required
+                           class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                           placeholder="e.g. admin or rahul_verma">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Password
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-key"></i>
+                    </span>
+                    <input type="password" id="password" name="password" required
+                           class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                           placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <span>Sign In to Portal</span>
+            </button>
+        </form>
+
+        <div class="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+            Don't have a student account? 
+            <a href="{{ url_for('register') }}" class="text-indigo-600 font-semibold hover:underline">Register Here</a>
+        </div>
+    </div>
+
+    <!-- Quick 1-Click Demo Accounts Section for Easy Testing -->
+    <div class="bg-indigo-50/70 rounded-2xl p-5 border border-indigo-100 space-y-3">
+        <div class="flex items-center space-x-2 text-indigo-900 font-bold text-xs uppercase tracking-wider">
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+            <span>1-Click Quick Demo Sign In</span>
+        </div>
+        <p class="text-[11px] text-indigo-700 leading-normal">
+            Select any test account below to automatically fill credentials and test both Student and Admin roles:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <!-- Admin Demo -->
+            <button onclick="fillLogin('admin', 'admin123')" class="p-2.5 rounded-xl bg-white border border-indigo-200 hover:border-indigo-400 hover:shadow-sm text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-indigo-900">Dr. Rajesh (Admin)</div>
+                    <div class="text-[10px] text-indigo-600 font-mono">admin / admin123</div>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-100 text-indigo-800">Admin</span>
+            </button>
+
+            <!-- Student 1 Demo -->
+            <button onclick="fillLogin('rahul_verma', 'student123')" class="p-2.5 rounded-xl bg-white border border-emerald-200 hover:border-emerald-400 hover:shadow-sm text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-slate-800">Rahul Verma</div>
+                    <div class="text-[10px] text-emerald-600 font-mono">21BCE101</div>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800">Student</span>
+            </button>
+
+            <!-- Student 2 Demo -->
+            <button onclick="fillLogin('sneha_patel', 'student123')" class="p-2.5 rounded-xl bg-white border border-emerald-200 hover:border-emerald-400 hover:shadow-sm text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-slate-800">Sneha Patel</div>
+                    <div class="text-[10px] text-emerald-600 font-mono">21BCE102</div>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800">Student</span>
+            </button>
+
+            <!-- Student 3 Demo (Pending Feedbacks) -->
+            <button onclick="fillLogin('vikram_aditya', 'student123')" class="p-2.5 rounded-xl bg-white border border-amber-200 hover:border-amber-400 hover:shadow-sm text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-slate-800">Vikram Aditya</div>
+                    <div class="text-[10px] text-amber-600 font-mono">Pending Feedbacks</div>
+                </div>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">Student</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillLogin(user, pass) {
+        document.getElementById('username').value = user;
+        document.getElementById('password').value = pass;
+    }
+</script>
+{% endblock %}

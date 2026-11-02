@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - B.Tech Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Welcome Header & Progress Card -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>{{ current_user['branch'] }} • {{ current_user['semester'] }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                Welcome back, {{ current_user['full_name'] }}!
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500">
+                University Roll No: <span class="font-mono font-bold text-slate-700">{{ current_user['roll_no'] }}</span> • Please complete the semester evaluation for all enrolled subjects.
+            </p>
+        </div>
+
+        <!-- Progress Overview Widget -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 w-full md:w-80 space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                <span>Evaluation Completion</span>
+                <span class="text-emerald-600">{{ completed }} / {{ total_subjects }} Completed</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full transition-all duration-500" style="width: {{ completion_pct }}%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                <span>{{ completion_pct }}% Done</span>
+                {% if pending > 0 %}
+                    <span class="text-amber-600 font-semibold">{{ pending }} Pending Feedback</span>
+                {% else %}
+                    <span class="text-emerald-600 font-semibold flex items-center"><i class="fa-solid fa-check-double mr-1"></i> All Done!</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-slate-900">{{ total_subjects }}</div>
+                <div class="text-xs text-slate-500 font-medium">Enrolled Subjects</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-emerald-600">{{ completed }}</div>
+                <div class="text-xs text-slate-500 font-medium">Submitted Feedbacks</div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-black text-amber-600">{{ pending }}</div>
+                <div class="text-xs text-slate-500 font-medium">Pending Actions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrolled Subjects Grid -->
+    <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Your Semester Evaluation Subjects</h2>
+                <p class="text-xs text-slate-500">Each feedback contains 5 criteria with 1 optional question and designated message boxes</p>
+            </div>
+            <div class="text-xs text-slate-500 flex items-center space-x-2">
+                <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span> Submitted</span>
+                <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-1.5"></span> Action Required</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for subj in subjects %}
+            <div class="bg-white rounded-3xl p-6 border {% if subj.is_featured %}border-amber-400/80 bg-gradient-to-br from-amber-50/20 via-white to-white shadow-md ring-1 ring-amber-400/20{% else %}border-slate-200 shadow-sm{% endif %} flex flex-col justify-between hover:shadow-md transition">
+                <div class="space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono {% if subj.is_featured %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-100 text-slate-700{% endif %}">
+                                {{ subj.code }}
+                            </span>
+                            {% if subj.is_featured %}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white flex items-center space-x-1">
+                                    <i class="fa-brands fa-python"></i>
+                                    <span>Python Spotlight</span>
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Status Badge -->
+                        {% if subj.feedback_id %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                <i class="fa-solid fa-check mr-1.5"></i> Submitted
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                <i class="fa-solid fa-clock mr-1.5"></i> Action Required
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">{{ subj.name }}</h3>
+                        <p class="text-xs text-slate-600 mt-1 line-clamp-2">{{ subj.description }}</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+                        <span class="flex items-center"><i class="fa-solid fa-chalkboard-user text-slate-400 mr-1.5"></i> {{ subj.instructor }}</span>
+                        <span class="flex items-center"><i class="fa-solid fa-layer-group text-slate-400 mr-1.5"></i> {{ subj.credits }} Credits</span>
+                    </div>
+
+                    <!-- Submission Summary if Submitted -->
+                    {% if subj.feedback_id %}
+                        <div class="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-100 flex items-center justify-between text-xs">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+                                    {{ subj.overall_score }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-emerald-900">Your Rating Score</div>
+                                    <div class="text-[10px] text-emerald-700">Recorded on {{ subj.submitted_at[:10] }}</div>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-emerald-700 font-medium">Secured in DB</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Button Footers -->
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <a href="{{ url_for('subject_analysis', subject_id=subj.id) }}" class="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold text-center transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-chart-pie text-cyan-600"></i>
+                        <span>View Analytics</span>
+                    </a>
+
+                    {% if subj.feedback_id %}
+                        <a href="{{ url_for('feedback_form', subject_id=subj.id) }}" class="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold text-center transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-pen"></i>
+                            <span>Edit Responses</span>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('feedback_form', subject_id=subj.id) }}" class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold text-center shadow-md transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Fill 5-Q Feedback</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

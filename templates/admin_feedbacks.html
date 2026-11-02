@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Feedback Submissions Directory - B.Tech{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Confidential Administrative Records</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
+                Student Feedback Submissions Directory
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-300">
+                Comprehensive repository of student evaluations, 5-question scores, and verbatim message box feedback.
+            </p>
+        </div>
+
+        <a href="{{ url_for('export_csv') }}" class="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition flex items-center space-x-2">
+            <i class="fa-solid fa-file-excel text-base"></i>
+            <span>Export to CSV / Excel</span>
+        </a>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+        <form method="GET" action="{{ url_for('admin_feedbacks') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Filter by Subject -->
+            <div>
+                <label for="subject_id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Filter by Subject:
+                </label>
+                <select name="subject_id" id="subject_id" onchange="this.form.submit()"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">All B.Tech Subjects</option>
+                    {% for subj in all_subjects %}
+                        <option value="{{ subj.id }}" {% if selected_subject == subj.id %}selected{% endif %}>
+                            {{ subj.code }}: {{ subj.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Search by Name or Roll No or Message -->
+            <div>
+                <label for="search" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Search Student / Keyword:
+                </label>
+                <div class="relative">
+                    <input type="text" name="q" id="search" value="{{ search_query }}" placeholder="Search by name, roll no, or remarks..."
+                           class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Search Buttons -->
+            <div class="flex items-end space-x-2">
+                <button type="submit" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition">
+                    Filter Results
+                </button>
+                {% if selected_subject or search_query %}
+                    <a href="{{ url_for('admin_feedbacks') }}" class="py-2.5 px-3 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition" title="Clear filters">
+                        Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Feedbacks Table -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Showing <strong>{{ feedbacks|length }}</strong> recorded student evaluations</span>
+            <span class="text-indigo-600 font-semibold flex items-center">
+                <i class="fa-solid fa-lock text-xs mr-1"></i> Admin View Only
+            </span>
+        </div>
+
+        {% if feedbacks %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 uppercase font-bold tracking-wider border-b border-slate-200">
+                            <th class="p-3.5">Student Details</th>
+                            <th class="p-3.5">Subject</th>
+                            <th class="p-3.5 text-center">Score</th>
+                            <th class="p-3.5 text-center">Curric. (Q1)</th>
+                            <th class="p-3.5 text-center">Method. (Q2)</th>
+                            <th class="p-3.5 text-center">Pace (Q3)</th>
+                            <th class="p-3.5 text-center">Labs (Q4)</th>
+                            <th class="p-3.5 text-center">Elective (Q5)</th>
+                            <th class="p-3.5">Date Logged</th>
+                            <th class="p-3.5 text-center">Inspection</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                        {% for fb in feedbacks %}
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="p-3.5">
+                                <div class="font-bold text-slate-900">{{ fb.full_name }}</div>
+                                <div class="text-[11px] font-mono text-indigo-600 font-semibold">{{ fb.roll_no }}</div>
+                                <div class="text-[10px] text-slate-400">{{ fb.email }}</div>
+                            </td>
+                            <td class="p-3.5">
+                                <span class="px-2 py-0.5 rounded font-mono font-bold bg-slate-100 text-slate-700 text-[11px]">{{ fb.subject_code }}</span>
+                                <div class="text-slate-800 font-semibold text-xs mt-0.5 truncate max-w-xs">{{ fb.subject_name }}</div>
+                            </td>
+                            <td class="p-3.5 text-center">
+                                <span class="px-2 py-1 rounded-md font-black text-xs bg-emerald-100 text-emerald-800">
+                                    ★ {{ fb.overall_score }}
+                                </span>
+                            </td>
+                            <td class="p-3.5 text-center font-mono font-bold">{{ fb.q1_score }}</td>
+                            <td class="p-3.5 text-center font-mono font-bold">{{ fb.q2_score }}</td>
+                            <td class="p-3.5 text-center font-mono font-bold">{{ fb.q3_score }}</td>
+                            <td class="p-3.5 text-center font-mono font-bold">{{ fb.q4_score }}</td>
+                            <td class="p-3.5 text-center font-mono font-bold text-slate-400">
+                                {% if fb.q5_score %}{{ fb.q5_score }}{% else %}—{% endif %}
+                            </td>
+                            <td class="p-3.5 text-slate-500 text-[11px]">
+                                {{ fb.submitted_at[:16] }}
+                            </td>
+                            <td class="p-3.5 text-center">
+                                <button onclick="openModal('modal_{{ fb.id }}')"
+                                        class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold transition flex items-center justify-center space-x-1 mx-auto">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    <span>Details</span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Modal for this feedback -->
+                        <div id="modal_{{ fb.id }}" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                                    <div>
+                                        <div class="inline-flex items-center space-x-1 text-xs font-bold text-indigo-600 uppercase">
+                                            <i class="fa-solid fa-lock"></i>
+                                            <span>Confidential Student Evaluation</span>
+                                        </div>
+                                        <h3 class="text-xl font-extrabold text-slate-900">{{ fb.full_name }} ({{ fb.roll_no }})</h3>
+                                        <p class="text-xs text-slate-500">{{ fb.subject_code }}: {{ fb.subject_name }} • Logged: {{ fb.submitted_at }}</p>
+                                    </div>
+                                    <button onclick="closeModal('modal_{{ fb.id }}')" class="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100">
+                                        <i class="fa-solid fa-xmark text-lg"></i>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                                    <!-- Q1 -->
+                                    <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                                        <div class="flex items-center justify-between font-bold text-xs text-slate-800">
+                                            <span>Q1: Curriculum & Syllabus Coverage</span>
+                                            <span class="text-amber-500">★ {{ fb.q1_score }} / 5</span>
+                                        </div>
+                                        <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 italic">
+                                            "{{ fb.q1_message or 'No message text submitted for Q1.' }}"
+                                        </div>
+                                    </div>
+
+                                    <!-- Q2 -->
+                                    <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                                        <div class="flex items-center justify-between font-bold text-xs text-slate-800">
+                                            <span>Q2: Teaching Methodology & Code Demos</span>
+                                            <span class="text-amber-500">★ {{ fb.q2_score }} / 5</span>
+                                        </div>
+                                        <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 italic">
+                                            "{{ fb.q2_message or 'No message text submitted for Q2.' }}"
+                                        </div>
+                                    </div>
+
+                                    <!-- Q3 -->
+                                    <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                                        <div class="flex items-center justify-between font-bold text-xs text-slate-800">
+                                            <span>Q3: Pace of Instruction & Doubt Resolution</span>
+                                            <span class="text-amber-500">★ {{ fb.q3_score }} / 5</span>
+                                        </div>
+                                        <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 italic">
+                                            "{{ fb.q3_message or 'No message text submitted for Q3.' }}"
+                                        </div>
+                                    </div>
+
+                                    <!-- Q4 -->
+                                    <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                                        <div class="flex items-center justify-between font-bold text-xs text-slate-800">
+                                            <span>Q4: Hands-on Lab Tasks & Projects</span>
+                                            <span class="text-amber-500">★ {{ fb.q4_score }} / 5</span>
+                                        </div>
+                                        <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 italic">
+                                            "{{ fb.q4_message or 'No message text submitted for Q4.' }}"
+                                        </div>
+                                    </div>
+
+                                    <!-- Q5 (Optional) -->
+                                    <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/40 space-y-1">
+                                        <div class="flex items-center justify-between font-bold text-xs text-slate-800">
+                                            <span class="flex items-center space-x-1.5">
+                                                <span>Q5: Industry Readiness & Electives</span>
+                                                <span class="px-1.5 py-0.2 rounded text-[9px] bg-emerald-100 text-emerald-800">Optional</span>
+                                            </span>
+                                            <span class="text-amber-500">
+                                                {% if fb.q5_score %}★ {{ fb.q5_score }} / 5{% else %}<span class="text-slate-400 font-normal">Not rated</span>{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-emerald-200 italic">
+                                            "{{ fb.q5_message or 'Optional Q5 message box left blank.' }}"
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                                    <div class="text-xs font-bold text-slate-800">
+                                        Overall Calculated Score: <span class="text-emerald-600 font-black text-sm">★ {{ fb.overall_score }} / 5.0</span>
+                                    </div>
+                                    <button onclick="closeModal('modal_{{ fb.id }}')" class="px-5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800">
+                                        Close Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-12 text-slate-500 text-xs">
+                No matching student feedback found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+</script>
+{% endblock %}

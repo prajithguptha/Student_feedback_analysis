@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}B.Tech Python Course Feedback & Subject Analytics System{% endblock %}
+
+{% block content %}
+<div class="space-y-12">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-8 md:p-12 border border-slate-800 shadow-2xl">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-3xl space-y-6">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+                <i class="fa-brands fa-python text-amber-400 text-sm"></i>
+                <span>B.Tech Semester Course Evaluation Cycle</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                Academic Course Feedback & <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">Subject Analytics System</span>
+            </h1>
+
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+                A unified evaluation platform for B.Tech courses featuring in-depth analysis for <strong>Python Programming & Application Development</strong>. Empowering students with structured 5-dimension feedback and providing faculty administrators with actionable analytics.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+                {% if current_user %}
+                    <a href="{{ url_for('dashboard') }}" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg hover:shadow-emerald-500/25 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Go to My Dashboard</span>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg hover:shadow-emerald-500/25 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Student / Admin Sign In</span>
+                    </a>
+                {% endif %}
+                
+                <a href="{{ url_for('subject_analysis') }}" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-line text-cyan-400"></i>
+                    <span>Explore Subject Analysis</span>
+                </a>
+            </div>
+
+            <!-- Quick Metrics Strip -->
+            <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800 text-slate-300">
+                <div>
+                    <div class="text-2xl font-bold text-white">{{ stats.total_feedbacks or 0 }}</div>
+                    <div class="text-xs text-slate-400">Feedbacks Submitted</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-emerald-400">{{ (stats.avg_rating|round(2)) or '4.50' }} / 5.0</div>
+                    <div class="text-xs text-slate-400">Average Course Rating</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-cyan-400">5-Metric</div>
+                    <div class="text-xs text-slate-400">Evaluation Matrix</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Subject Showcase: Python Programming -->
+    {% if python_subject %}
+    <div class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white border border-amber-500/30 shadow-xl relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-3 max-w-2xl">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold uppercase">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span>Featured B.Tech Subject</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white">
+                    {{ python_subject.code }}: {{ python_subject.name }}
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    {{ python_subject.description }}
+                </p>
+                <div class="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-1">
+                    <span class="flex items-center"><i class="fa-solid fa-chalkboard-user text-amber-400 mr-1.5"></i> Faculty: {{ python_subject.instructor }}</span>
+                    <span class="flex items-center"><i class="fa-solid fa-graduation-cap text-cyan-400 mr-1.5"></i> Credits: {{ python_subject.credits }}</span>
+                    <span class="flex items-center"><i class="fa-solid fa-calendar-days text-emerald-400 mr-1.5"></i> {{ python_subject.semester }}</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[200px]">
+                <a href="{{ url_for('subject_analysis', subject_id=python_subject.id) }}" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs text-center shadow-md transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>View Python Analysis</span>
+                </a>
+                {% if current_user and current_user['role'] == 'student' %}
+                    <a href="{{ url_for('feedback_form', subject_id=python_subject.id) }}" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs text-center shadow-md transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Give Python Feedback</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Core Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-4">
+                <i class="fa-solid fa-list-ol"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 mb-2">5-Question Evaluation</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Structured criteria assessing curriculum, coding methodology, pacing, hands-on lab projects, plus an optional industry-readiness question.
+            </p>
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-indigo-600 flex items-center">
+                <i class="fa-solid fa-comment-dots mr-1.5"></i> Message box on every question
+            </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-4">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 mb-2">Interactive Floating Window</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Always available at the bottom corner. Check subject submission status in real-time or access the Python Help Desk without changing pages.
+            </p>
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-emerald-600 flex items-center">
+                <i class="fa-solid fa-arrows-up-down-left-right mr-1.5"></i> Draggable & collapsible widget
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl mb-4">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 mb-2">Role-Based Confidentiality</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Students see aggregated analysis and department metrics. Only certified HOD / Administrators can access student identities and raw message logs.
+            </p>
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-purple-600 flex items-center">
+                <i class="fa-solid fa-lock mr-1.5"></i> Admin-exclusive student details
+            </div>
+        </div>
+    </div>
+
+    <!-- All B.Tech Subjects Catalog -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900">B.Tech Enrolled Course Modules</h3>
+                <p class="text-xs text-slate-500">Semester 5 Curriculum with Python specialization</p>
+            </div>
+            <a href="{{ url_for('subject_analysis') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center">
+                View Comparative Analysis &rarr;
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {% for subj in all_subjects %}
+            <div class="bg-white rounded-2xl p-5 border {% if subj.is_featured %}border-amber-400/80 bg-amber-50/20 shadow-md ring-1 ring-amber-400/20{% else %}border-slate-200 shadow-sm{% endif %} flex flex-col justify-between hover:border-indigo-300 transition">
+                <div class="space-y-3">
+                    <div class="flex items-start justify-between">
+                        <span class="px-2.5 py-1 rounded-md text-xs font-bold font-mono {% if subj.is_featured %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {{ subj.code }}
+                        </span>
+                        {% if subj.is_featured %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white uppercase tracking-wider">
+                                Featured
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="font-bold text-slate-800 text-base leading-snug">
+                        {{ subj.name }}
+                    </h4>
+
+                    <p class="text-xs text-slate-500 line-clamp-2">
+                        {{ subj.description }}
+                    </p>
+
+                    <div class="text-xs text-slate-600 flex items-center space-x-1.5 pt-1">
+                        <i class="fa-solid fa-user-tie text-slate-400"></i>
+                        <span>{{ subj.instructor }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <a href="{{ url_for('subject_analysis', subject_id=subj.id) }}" class="flex-1 py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold text-center transition">
+                        Analysis
+                    </a>
+                    {% if current_user and current_user['role'] == 'student' %}
+                        <a href="{{ url_for('feedback_form', subject_id=subj.id) }}" class="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold text-center shadow-sm transition">
+                            Feedback
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

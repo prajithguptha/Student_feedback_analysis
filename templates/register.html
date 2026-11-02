@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - B.Tech Feedback Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto my-8">
+    <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl space-y-6">
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-2xl shadow-md">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Student Enrollment</h2>
+            <p class="text-xs text-slate-500">Register with your B.Tech University Roll Number to submit subject feedback</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('register') }}" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Full Name</label>
+                    <input type="text" name="full_name" required placeholder="e.g. Ankit Sharma"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Roll Number</label>
+                    <input type="text" name="roll_no" required placeholder="e.g. 21BCE109"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm uppercase">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
+                    <input type="text" name="username" required placeholder="e.g. ankit_sharma"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Official Student Email</label>
+                    <input type="email" name="email" required placeholder="ankit@student.btech.ac.in"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Branch</label>
+                    <select name="branch" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                        <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="AI & Data Science">AI & Data Science</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Semester</label>
+                    <select name="semester" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                        <option value="B.Tech 5th Semester">B.Tech 5th Semester</option>
+                        <option value="B.Tech 6th Semester">B.Tech 6th Semester</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+                    <input type="password" name="password" required placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Confirm Password</label>
+                    <input type="password" name="confirm_password" required placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-check"></i>
+                <span>Complete Student Registration</span>
+            </button>
+        </form>
+
+        <div class="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+            Already registered? 
+            <a href="{{ url_for('login') }}" class="text-emerald-600 font-semibold hover:underline">Sign In here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

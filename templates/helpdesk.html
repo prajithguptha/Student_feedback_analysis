@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Help Desk & Student Support - B.Tech Python Hub{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                <i class="fa-solid fa-headset text-amber-400"></i>
+                <span>B.Tech Academic & Technical Assistance</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
+                Course Help Desk & Query Resolution
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-300">
+                Submit queries regarding Python programming lab setups, mini-project guidelines, feedback form assistance, or academic doubts.
+            </p>
+        </div>
+
+        <a href="#submitTicket" class="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg transition flex items-center space-x-2">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Submit New Query</span>
+        </a>
+    </div>
+
+    <!-- Frequently Asked Questions (Accordion) -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+        <div class="pb-2 border-b border-slate-100">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                <i class="fa-brands fa-python text-amber-500"></i>
+                <span>Python Subject FAQs & Evaluation Guidelines</span>
+            </h2>
+            <p class="text-xs text-slate-500">Quick answers to common student questions about Python lab setup and feedback submission</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <details class="bg-slate-50 border border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-indigo-300 transition" open>
+                <summary class="font-bold text-slate-800 flex items-center justify-between">
+                    <span>What Python libraries are required for the B.Tech lab?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                </summary>
+                <p class="mt-2 text-slate-600 leading-relaxed">
+                    CS301 uses Python 3.10+ along with standard library modules, Flask for web application modules, and NumPy/Pandas for introductory data analysis exercises.
+                </p>
+            </details>
+
+            <details class="bg-slate-50 border border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-indigo-300 transition" open>
+                <summary class="font-bold text-slate-800 flex items-center justify-between">
+                    <span>Is Question 5 mandatory in the feedback form?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                </summary>
+                <p class="mt-2 text-slate-600 leading-relaxed">
+                    No, Question 5 is strictly <strong>optional</strong>. It exists for students who wish to propose modern elective frameworks (e.g. Django, FastAPI, PyTorch). Questions 1 to 4 are compulsory.
+                </p>
+            </details>
+
+            <details class="bg-slate-50 border border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-indigo-300 transition">
+                <summary class="font-bold text-slate-800 flex items-center justify-between">
+                    <span>Are my message box remarks kept confidential?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                </summary>
+                <p class="mt-2 text-slate-600 leading-relaxed">
+                    Yes. General subject analytics displayed on the public dashboard are completely aggregated and anonymous. Individual student names and raw message box notes are strictly reserved for the Department Administrator.
+                </p>
+            </details>
+
+            <details class="bg-slate-50 border border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-indigo-300 transition">
+                <summary class="font-bold text-slate-800 flex items-center justify-between">
+                    <span>How do I report Python virtual environment errors in lab computers?</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                </summary>
+                <p class="mt-2 text-slate-600 leading-relaxed">
+                    Select "Technical Lab Issue" in the ticket form below, provide your lab seat number, and our system administrators will resolve the permissions promptly.
+                </p>
+            </details>
+        </div>
+    </div>
+
+    <!-- Submit Query Form (For Students) & Tickets List -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Submit Ticket Card -->
+        <div class="lg:col-span-1 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4" id="submitTicket">
+            <div class="pb-2 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane text-indigo-600"></i>
+                    <span>Raise Support Query</span>
+                </h3>
+                <p class="text-xs text-slate-500">Directly reaches faculty and lab assistants</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('helpdesk') }}" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Query Subject / Title</label>
+                    <input type="text" name="title" required placeholder="e.g. Doubt in Python Flask Routing"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Category</label>
+                    <select name="category" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <option value="Academic Course Doubt">Academic Course Doubt (Python)</option>
+                        <option value="Technical Lab Issue">Technical Lab Issue</option>
+                        <option value="Feedback Portal Query">Feedback Portal Query</option>
+                        <option value="Mini-Project Guidelines">Mini-Project Guidelines</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Related Subject</label>
+                    <select name="subject_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <option value="">General / Across Subjects</option>
+                        {% for s in subjects %}
+                            <option value="{{ s.id }}" {% if s.code == 'CS301' %}selected{% endif %}>
+                                {{ s.code }}: {{ s.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Detailed Message</label>
+                    <textarea name="message" rows="4" required placeholder="Describe your query or error message clearly..."
+                              class="w-full p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Submit Help Desk Ticket</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Tickets History / Admin Management -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">
+                        {% if current_user['role'] == 'admin' %}
+                            All Student Support Tickets (Admin Queue)
+                        {% else %}
+                            Your Active Queries & Faculty Responses
+                        {% endif %}
+                    </h3>
+                    <p class="text-xs text-slate-500">Track resolution status and instructor answers</p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                    {{ tickets|length }} Tickets
+                </span>
+            </div>
+
+            {% if tickets %}
+                <div class="space-y-4">
+                    {% for t in tickets %}
+                    <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3 hover:bg-white hover:shadow-sm transition">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold text-sm text-slate-900">{{ t.title }}</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700">
+                                        {{ t.category }}
+                                    </span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">
+                                    {% if current_user['role'] == 'admin' %}
+                                        Submitted by <strong>{{ t.full_name }}</strong> ({{ t.roll_no }}) • 
+                                    {% endif %}
+                                    {{ t.subject_code or 'General' }} • {{ t.created_at[:16] }}
+                                </div>
+                            </div>
+
+                            <!-- Status Pill -->
+                            <div>
+                                {% if t.status == 'Resolved' %}
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        <i class="fa-solid fa-check mr-1"></i> Resolved
+                                    </span>
+                                {% elif t.status == 'In Progress' %}
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                        <i class="fa-solid fa-spinner animate-spin mr-1"></i> In Progress
+                                    </span>
+                                {% else %}
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                        <i class="fa-solid fa-circle-dot mr-1"></i> Open
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Query Message -->
+                        <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                            {{ t.message }}
+                        </div>
+
+                        <!-- Faculty / Admin Reply Display -->
+                        {% if t.admin_reply %}
+                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1">
+                                <div class="text-[11px] font-bold text-emerald-900 flex items-center space-x-1.5">
+                                    <i class="fa-solid fa-reply text-emerald-600"></i>
+                                    <span>Faculty Administrator Response:</span>
+                                    <span class="text-emerald-700 font-normal">({{ t.replied_at[:16] if t.replied_at else 'Recent' }})</span>
+                                </div>
+                                <div class="text-xs text-emerald-800">
+                                    {{ t.admin_reply }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Admin Reply Action Box -->
+                        {% if current_user['role'] == 'admin' %}
+                            <details class="text-xs pt-2 border-t border-slate-200">
+                                <summary class="font-bold text-indigo-600 cursor-pointer hover:underline">
+                                    Reply to Ticket #{{ t.id }} / Update Status
+                                </summary>
+                                <form method="POST" action="{{ url_for('helpdesk_reply', ticket_id=t.id) }}" class="mt-3 space-y-2">
+                                    <textarea name="admin_reply" rows="2" required placeholder="Type official response to student..."
+                                              class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ t.admin_reply or '' }}</textarea>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-slate-600">Status:</span>
+                                            <select name="status" class="px-2 py-1 rounded-lg border border-slate-300 text-xs bg-white">
+                                                <option value="Resolved" {% if t.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                                <option value="In Progress" {% if t.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                                <option value="Open" {% if t.status == 'Open' %}selected{% endif %}>Open</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition">
+                                            Submit Reply
+                                        </button>
+                                    </div>
+                                </form>
+                            </details>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12 text-slate-500 text-xs">
+                    No help desk queries recorded yet.
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
